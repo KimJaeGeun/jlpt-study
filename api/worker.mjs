@@ -4,14 +4,19 @@ const modes = ["all", "new", "wrong"];
 const count = (value, max = 1_000_000_000) =>
   Number.isSafeInteger(value) && value >= 0 && value <= max;
 
+function validQuestionIds(ids) {
+  return Array.isArray(ids) && ids.length <= 2000 &&
+    ids.every(id => typeof id === "string" && /^N[1-5]:(vocab|grammar|reading):\d{1,4}$/.test(id));
+}
+
 function validState(state) {
   return state &&
     count(state.solved) && count(state.correct, state.solved) &&
     count(state.today, state.solved) && /^\d{4}-\d{2}-\d{2}$/.test(state.day) &&
-    Array.isArray(state.wrong) && state.wrong.length <= 2000 &&
-    state.wrong.every(id => typeof id === "string" && /^N[1-5]:(vocab|grammar|reading):\d{1,4}$/.test(id)) &&
+    validQuestionIds(state.wrong) &&
+    (state.solvedIds === undefined || validQuestionIds(state.solvedIds)) &&
     levels.includes(state.level) && tabs.includes(state.tab) && modes.includes(state.mode) &&
-    count(state.idx, 2000) &&
+    (state.idx === -1 || count(state.idx, 2000)) &&
     (state.selected === -1 || count(state.selected, 4)) &&
     typeof state.checked === "boolean" && (!state.checked || state.selected >= 0);
 }

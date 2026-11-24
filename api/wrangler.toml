@@ -3,9 +3,9 @@ main = "worker.mjs"
 compatibility_date = "2026-11-24"
 
 [vars]
-PAGE_ORIGIN = "https://kimjs37.github.io"
+PAGE_ORIGIN = "https://kimjaegeun.github.io"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "jlpt-study-progress"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "6ecabad8-4fbf-4309-8161-5270af530acd"
