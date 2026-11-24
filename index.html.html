@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JLPT PASS — 일본어 합격 학습</title>
+<style>
+:root{--bg:#f5f7fb;--panel:#fff;--ink:#172033;--muted:#718096;--line:#e6eaf1;--blue:#3867e8;--blue2:#edf2ff;--green:#16845b;--red:#d94b55;--shadow:0 8px 28px #1d31500c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Noto Sans KR",system-ui,sans-serif}
+button,select{font:inherit}button{cursor:pointer;border:0}.app{max-width:1180px;margin:auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{font-size:22px;font-weight:850;letter-spacing:-.7px}.brand span{color:var(--blue)}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.topright{display:flex;gap:10px;align-items:center}.pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-size:13px}
+.hero{background:linear-gradient(115deg,#1f3676,#426de8);color:white;border-radius:22px;padding:27px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)}
+.hero h1{font-size:26px;margin:0 0 8px}.hero p{margin:0;color:#dce5ff;font-size:14px}.hero .tag{background:#ffffff20;padding:9px 13px;border-radius:12px;font-size:13px}
+.tabs{display:flex;gap:8px;margin:22px 0 18px;flex-wrap:wrap}.tab{background:#fff;border:1px solid var(--line);padding:11px 17px;border-radius:12px;color:#526078;font-weight:700}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.panel h2{margin:0;font-size:19px}.muted{color:var(--muted)}.small{font-size:12px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+select{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.stat{background:#f7f9fd;border-radius:13px;padding:13px}.stat b{display:block;font-size:21px;margin-top:4px}.stat span{font-size:12px;color:var(--muted)}
+.progress{height:7px;background:#edf0f6;border-radius:99px;overflow:hidden;margin:12px 0}.progress i{display:block;height:100%;background:var(--blue);width:0;transition:.2s}
+.question{font-size:14px;font-weight:700;margin:18px 0 13px}.word{font-size:37px;font-weight:850;text-align:center;margin:20px 0 3px;letter-spacing:1px}.reading{font-size:14px;color:var(--muted);text-align:center}
+.choices{display:grid;gap:9px;margin-top:20px}.choice{width:100%;text-align:left;padding:14px 15px;border:1px solid var(--line);background:#fff;border-radius:12px;display:flex;gap:12px;align-items:center;transition:.15s}.choice:hover{border-color:#9bb2ff;background:#fafbff}.choice .num{width:25px;height:25px;border-radius:8px;background:#f0f3f8;display:grid;place-items:center;font-size:12px;font-weight:800;color:#66748c}.choice.selected{border:1.5px solid var(--blue);background:var(--blue2)}.choice.correct{border:1.5px solid var(--green);background:#effaf5}.choice.wrong{border:1.5px solid var(--red);background:#fff2f3}
+.actions{display:flex;gap:9px;margin-top:18px}.primary,.secondary{padding:12px 17px;border-radius:11px;font-weight:750}.primary{background:var(--blue);color:#fff;flex:1}.primary:disabled{opacity:.4;cursor:not-allowed}.secondary{background:#f0f3f8;color:#46536b}
+.explain{display:none;margin-top:16px;padding:15px;border-radius:12px;background:#f6f8fc;font-size:13px;line-height:1.7}.explain.show{display:block}.explain strong{color:var(--green)}
+.sidebox{margin-bottom:14px}.sidebox h3{font-size:14px;margin:0 0 12px}.levelgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.level{padding:9px 0;border-radius:9px;background:#f2f4f8;color:#536079;font-weight:750}.level.active{background:var(--blue);color:#fff}.sideitem{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f2f6;font-size:13px}.sideitem:last-child{border:0}
+.readingtext{line-height:2;background:#f8f9fc;border-radius:13px;padding:18px;font-size:15px;margin:16px 0}.grammarline{font-size:22px;text-align:center;font-weight:750;margin:25px 0}.empty{padding:35px;text-align:center;color:var(--muted)}
+footer{text-align:center;color:#9aa4b5;font-size:11px;margin:22px 0}
+@media(max-width:800px){.app{padding:14px}.layout{grid-template-columns:1fr}.hero{padding:22px;display:block}.hero .tag{display:inline-block;margin-top:16px}.stats{grid-template-columns:repeat(3,1fr)}header{align-items:flex-start}.topright .pill:first-child{display:none}}
+</style>
+</head>
+<body><div class="app">
+<header><div><div class="brand">JLPT <span>PASS</span></div><div class="sub">일본어 능력시험 합격 학습 플랫폼</div></div><div class="topright"><div class="pill">🎯 목표 등급 <b id="goalLabel">N2</b></div><div class="pill">🔥 연속 학습 <b id="streak">1일</b></div></div></header>
+<section class="hero"><div><h1>오늘도 한 단계 합격에 가까워지기</h1><p>N5부터 N1까지, 어휘 · 문법 · 독해를 체계적으로 학습하세요.</p></div><div class="tag">현재 집중 등급　<b>N2</b></div></section>
+<nav class="tabs"><button class="tab active" data-tab="vocab">📚 어휘</button><button class="tab" data-tab="grammar">✍️ 문법</button><button class="tab" data-tab="reading">📖 독해</button><button class="tab" data-tab="wrong">↻ 오답 노트</button></nav>
+<div class="layout"><main class="panel">
+<div class="sectionhead"><div><h2 id="mainTitle">어휘 5지선다</h2><div class="muted small" id="mainDesc">단어의 의미를 정확하게 골라보세요.</div></div><select id="mode"><option value="all">전체 문제</option><option value="new">새 문제 우선</option><option value="wrong">오답 복습</option></select></div>
+<div class="stats"><div class="stat"><span>오늘 푼 문제</span><b id="todayCount">0</b></div><div class="stat"><span>정답률</span><b id="accuracy">-</b></div><div class="stat"><span>누적 오답</span><b id="wrongCount">0</b></div></div>
+<div class="sectionhead"><span class="small muted" id="qCount">문제 1</span><span class="small muted" id="levelLabel">N2 어휘</span></div><div class="progress"><i id="bar"></i></div>
+<div id="quiz"></div>
+</main><aside>
+<div class="panel sidebox"><h3>학습 등급 선택</h3><div class="levelgrid" id="levels"></div><p class="small muted" style="margin:11px 0 0">전체 등급을 지원하며 N2가 기본 선택입니다.</p></div>
+<div class="panel sidebox"><h3>나의 학습 현황</h3><div class="sideitem"><span>누적 풀이</span><b id="totalSolved">0문제</b></div><div class="sideitem"><span>정답</span><b id="totalCorrect">0문제</b></div><div class="sideitem"><span>오답 노트</span><b id="wrongTotal">0문제</b></div><div class="sideitem"><span>선택 등급</span><b id="currentLevel">N2</b></div></div>
+<div class="panel sidebox"><h3>문제은행 안내</h3><p class="small muted" style="line-height:1.8;margin:0">문항은 JLPT 공식 공개 자료의 문제 유형과 평가 목적을 참고해 새로 작성한 연습문제입니다. 실제 기출 원문을 복제하지 않으며, 등급별·유형별 문제은행을 계속 확장할 수 있습니다.</p></div>
+</aside></div>
+<footer>JLPT PASS · N2 집중 학습 · 학습 기록은 현재 사용 중인 브라우저에 저장됩니다.</footer></div>
+<script>
+const db={
+N5:[
+{w:"学校",r:"がっこう",q:"학교",a:["학교","회사","도서관","병원","역"],c:0,e:"学校（がっこう）는 학교입니다.",kind:"한자 읽기",prompt:"밑줄 친 단어의 읽기로 가장 적절한 것을 고르세요.",opts:["がっこう","がくこう","がっこ","がっきょう","がくこ"]},
+{w:"毎日",r:"まいにち",q:"매일",a:["매주","매달","매일","매년","매번"],c:2,e:"毎日（まいにち）는 매일이라는 뜻입니다."},
+{w:"大切",r:"たいせつ",q:"소중하다",a:["위험하다","소중하다","간단하다","시끄럽다","불편하다"],c:1,e:"大切（たいせつ）는 소중하다, 중요하다는 의미입니다."},
+{w:"友達",r:"ともだち",q:"친구",a:["가족","선생님","친구","이웃","손님"],c:2,e:"友達（ともだち）는 친구입니다.",kind:"한자 읽기",prompt:"밑줄 친 단어의 읽기로 가장 적절한 것을 고르세요.",opts:["ともたち","ともだち","どもだち","ともだっち","ともだじ"]}],
+N4:[
+{w:"準備",r:"じゅんび",q:"준비",a:["정리","준비","연습","약속","설명"],c:1,e:"準備（じゅんび）는 준비입니다."},
+{w:"比べる",r:"くらべる",q:"비교하다",a:["바꾸다","조사하다","비교하다","계속하다","결정하다"],c:2,e:"比べる（くらべる）는 비교하다입니다."},
+{w:"経験",r:"けいけん",q:"경험",a:["경험","계획","관계","기회","실패"],c:0,e:"経験（けいけん）는 경험입니다.",kind:"한자 읽기",prompt:"밑줄 친 단어의 읽기로 가장 적절한 것을 고르세요.",opts:["けいげん","けいけん","けんけい","けいげい","けんげん"]}],
+N3:[
+{w:"影響",r:"えいきょう",q:"영향",a:["인상","영향","상황","원인","결과"],c:1,e:"影響（えいきょう）는 영향입니다."},
+{w:"確認",r:"かくにん",q:"확인",a:["확인","허가","취소","신청","경험"],c:0,e:"確認（かくにん）는 확인입니다."},
+{w:"適切",r:"てきせつ",q:"적절하다",a:["불필요하다","적절하다","불가능하다","불규칙하다","불충분하다"],c:1,e:"適切（てきせつ）는 상황이나 목적에 알맞다는 뜻입니다."},
+{w:"減少",r:"げんしょう",q:"감소",a:["증가","감소","변화","확대","이동"],c:1,e:"減少（げんしょう）는 수나 양이 줄어드는 것입니다."}],
+N2:[
+{w:"著しい",r:"いちじるしい",q:"현저하다, 두드러지다",a:["조용하다","현저하다, 두드러지다","친절하다","복잡하다","부족하다"],c:1,e:"著しい（いちじるしい）는 변화나 차이가 눈에 띄게 크다는 뜻입니다. 著しい変化(현저한 변화)."},
+{w:"促す",r:"うながす",q:"재촉하다, 촉구하다",a:["거절하다","재촉하다, 촉구하다","의심하다","피하다","허락하다"],c:1,e:"促す（うながす）는 어떤 행동을 하도록 재촉하거나 촉구한다는 뜻입니다."},
+{w:"曖昧",r:"あいまい",q:"애매함",a:["명확함","애매함","정확함","솔직함","복잡함"],c:1,e:"曖昧（あいまい）는 분명하지 않고 애매한 상태입니다."},
+{w:"維持",r:"いじ",q:"유지",a:["개선","유지","확대","축소","중단"],c:1,e:"維持（いじ）는 상태나 수준을 그대로 지킴을 뜻합니다."},
+{w:"著者",r:"ちょしゃ",q:"저자",a:["독자","저자","편집자","출판사","번역가"],c:1,e:"著者（ちょしゃ）는 책이나 글을 쓴 사람입니다."},
+{w:"彼は会議で自分の意見を（　）した。",r:"",q:"主張",a:["主張","維持","省略","遠慮","把握"],c:0,e:"意見を主張する는 의견을 주장하다라는 자연스러운 결합입니다.",kind:"문맥 규정",prompt:"문장의 의미에 맞는 가장 적절한 단어를 고르세요.",display:"彼は会議で自分の意見を（　）した。"},
+{w:"この薬を飲めば、痛みが（　）和らぐはずだ。",r:"",q:"多少",a:["多少","相当","別々","勝手","一斉"],c:0,e:"多少는 어느 정도, 조금이라는 뜻으로 문맥에 자연스럽습니다.",kind:"문맥 규정",prompt:"문장의 의미에 맞는 가장 적절한 단어를 고르세요.",display:"この薬を飲めば、痛みが（　）和らぐはずだ。"},
+{w:"彼の説明は要点がまとまっていて、とても（　）だった。",r:"",q:"簡潔",a:["簡潔","曖昧","過剰","強引","平凡"],c:0,e:"簡潔（かんけつ）는 간결하다는 뜻입니다. 要点がまとまっている와 잘 어울립니다.",kind:"문맥 규정",prompt:"문장의 의미에 맞는 가장 적절한 단어를 고르세요.",display:"彼の説明は要点がまとまっていて、とても（　）だった。"},
+{w:"「延期する」と最も意味が近いものはどれですか。",r:"",q:"予定を後にする",a:["予定を取り消す","予定を後にする","予定を早める","予定を決める","予定を変えない"],c:1,e:"延期する는 예정이나 일정을 뒤로 미루는 것으로、予定を後にする와 의미가 가깝습니다.",kind:"유의어",prompt:"밑줄 친 표현과 의미가 가장 가까운 것을 고르세요.",display:"「延期する」と最も意味が近いものはどれですか。"},
+{w:"彼は責任を（　）ため、最後まで仕事を続けた。",r:"",q:"果たす",a:["果たす","避ける","疑う","崩す","失う"],c:0,e:"責任を果たす는 책임을 다하다라는 관용적인 결합입니다.",kind:"용법",prompt:"문장 속 단어의 사용법으로 가장 적절한 것을 고르세요.",display:"彼は責任を（　）ため、最後まで仕事を続けた。"}
+],
+N1:[
+{w:"踏襲",r:"とうしゅう",q:"전례를 따름",a:["전례를 따름","전면 개정","일부 생략","강력한 반대","새롭게 창조"],c:0,e:"踏襲（とうしゅう）는 기존의 방식이나 전례를 그대로 이어 따르는 것입니다."},
+{w:"懸念",r:"けねん",q:"걱정, 우려",a:["확신","걱정, 우려","칭찬","기대","결심"],c:1,e:"懸念（けねん）는 어떤 일이 잘못될 가능성을 걱정하는 것입니다."},
+{w:"抜本的",r:"ばっぽんてき",q:"근본적",a:["일시적","근본적","표면적","부분적","우발적"],c:1,e:"抜本的（ばっぽんてき）는 문제의 근본부터 바꾸는 것을 의미합니다."},
+{w:"妥協",r:"だきょう",q:"타협",a:["대립","타협","강요","거부","독립"],c:1,e:"妥協（だきょう）는 서로 양보하여 의견을 맞추는 것입니다."}]
+};
+const grammar={
+N5:[{s:"毎朝、コーヒー（　）飲みます。",a:["を","に","が","で","へ"],c:0,e:"목적어를 나타내는 조사 を가 정답입니다."},{s:"日曜日（　）友達と映画を見ました。",a:["に","を","が","で","へ"],c:0,e:"특정 날짜를 나타낼 때 に를 사용합니다."}],
+N4:[{s:"雨が降っている（　）、出かけました。",a:["のに","ので","ために","ように","ばかり"],c:0,e:"のに는 예상과 반대되는 결과를 나타내며 '~인데도'라는 뜻입니다."},{s:"日本へ行く（　）、パスポートを用意してください。",a:["ときは","ところで","あいだに","ばかりに","うちを"],c:0,e:"어떤 일을 할 때를 나타내는 ときは가 자연스럽습니다."}],
+N3:[{s:"忙しくて、昼ご飯を食べる時間（　）なかった。",a:["さえ","ほど","だけ","まで","しか"],c:0,e:"時間さえなかった는 시간조차 없었다는 의미입니다."},{s:"説明書をよく読んでから、機械を使う（　）にしてください。",a:["よう","そう","ため","こと","もの"],c:0,e:"～ようにしてください는 '~하도록 해 주세요'라는 요청 표현입니다."}],
+N2:[
+{s:"彼は経験が豊富な（　）、今回の仕事には向いていない。",a:["だけあって","一方で","ことから","末に","に限って"],c:1,e:"一方で는 한편으로는이라는 뜻으로 앞뒤의 대조를 나타냅니다."},
+{s:"計画を変更する（　）、関係者全員に連絡する必要がある。",a:["にあたって","に反して","に沿って","に限らず","を問わず"],c:0,e:"にあたって는 어떤 일을 실행함에 있어서라는 뜻입니다."},
+{s:"この店は値段が高い（　）、サービスが非常にいい。",a:["だけに","ものの","にしては","どころか","に限り"],c:1,e:"ものの는 '~이기는 하지만'이라는 역접을 나타냅니다."},
+{s:"十分に検討した（　）、今回は計画を見送ることにした。",a:["あげく","末に","最中に","以来","次第"],c:1,e:"末に는 여러 과정을 거친 끝에 어떤 결과에 이르렀음을 나타냅니다."},
+{s:"彼の発言は、事実を確認しない（　）行われたものだった。",a:["まま","うえで","ばかり","ところ","限り"],c:0,e:"～ないまま는 어떤 상태를 바꾸지 않고 그대로 한 일을 나타냅니다."},
+{s:"（１）資料を確認し、（２）必要な箇所を修正し、（３）担当者に送る。（　）最も自然な順序はどれか。",a:["確認→修正→送付","送付→確認→修正","修正→送付→確認","確認→送付→修正","送付→修正→確認"],c:0,e:"문장의 작업 흐름은 자료 확인, 필요한 부분 수정, 담당자에게 발송 순서입니다.",kind:"문장 구성"}
+],
+N1:[
+{s:"彼の説明は論理的である（　）、前提に誤りがある。",a:["ものの","からには","にしては","といえども","にひきかえ"],c:0,e:"ものの는 '~이기는 하지만'이라는 역접을 나타냅니다."},
+{s:"計画の実現は、関係者の協力（　）不可能だろう。",a:["なしには","に先立ち","を皮切りに","に即して","と相まって"],c:0,e:"なしには는 '~없이는'이라는 뜻으로 필수 조건을 나타냅니다."}]
+};
+const reading={
+N5:[{text:"わたしは毎朝六時に起きます。朝ご飯を食べて、七時に家を出ます。学校まで電車で三十分かかります。",q:"学校までどのくらいかかりますか。",a:["十分","二十分","三十分","一時間","二時間"],c:2,e:"본문에 学校まで電車で三十分かかります라고 나와 있습니다."}],
+N4:[{text:"田中さんは先月、新しい仕事を始めました。仕事は忙しいですが、毎日いろいろなことを学べるので楽しいと言っています。",q:"田中さんは新しい仕事についてどう思っていますか。",a:["簡単すぎる","忙しいが楽しい","給料が低い","やめたい","前の仕事より暇だ"],c:1,e:"忙しいですが…楽しい라고 했으므로 바쁘지만 즐겁다고 생각합니다."}],
+N3:[{text:"最近、地域の図書館を利用する人が減っている。一方で、図書館を勉強や仕事の場所として利用する若者は増えている。図書館には本を読む場所という役割だけでなく、人々が集まる場所としての役割も期待されている。",q:"筆者が図書館に期待していることは何か。",a:["本の数を減らすこと","若者だけが利用すること","人々が集まる場所になること","営業時間を短くすること","仕事を禁止すること"],c:2,e:"마지막 문장에서 사람들이 모이는 장소로서의 역할도 기대한다고 설명합니다."}],
+N2:[
+{text:"新しい技術が導入されると、仕事の効率が上がることが多い。しかし、技術を導入するだけで問題が解決するわけではない。使う人が目的を理解し、状況に応じて適切に活用できて初めて、その効果が十分に発揮される。つまり、技術そのものよりも、それをどのように使うかが重要なのである。",q:"筆者が最も言いたいことは何か。",a:["新技術はできるだけ早く導入すべきだ","技術の導入だけで仕事の問題は解決する","技術は高価なほど効果が高い","技術を使う目的や方法が重要だ","仕事の効率は技術と関係がない"],c:3,e:"기술 자체보다 목적을 이해하고 어떻게 활용하는지가 중요하다고 강조합니다."},
+{text:"ある会社では、社員の意見を集めるために定期的なアンケートを実施している。しかし、回答を集めるだけでは職場の改善にはつながらない。寄せられた意見を分析し、実行できるものから具体的な対策を取り、その結果を社員に知らせることが重要だ。意見を出しても何も変わらないと感じれば、社員は次第に協力しなくなるだろう。",q:"筆者によると、アンケートを職場改善に役立てるために必要なことは何か。",a:["回答数をできるだけ増やすこと","匿名で回答できないようにすること","意見を分析し、対策と結果を共有すること","毎週アンケートを実施すること","社員に回答を強制すること"],c:2,e:"의견을 분석해 구체적인 대책을 실행하고 결과를 직원에게 알리는 것이 중요하다고 했습니다."},
+{text:"近年、買い物の方法は多様化し、インターネットで商品を購入する人も増えた。オンライン販売は時間や場所を選ばずに利用できる点で便利だが、実物を手に取って確認できないという弱点もある。そのため、店舗で実物を確認してからオンラインで購入するなど、複数の方法を組み合わせる人もいる。",q:"本文の内容と合っているものはどれか。",a:["オンライン販売では商品を自由に返品できる","実店舗で買い物をする人はいなくなった","オンライン購入には実物を確認できないという面がある","買い物の方法は以前より少なくなった","店舗とオンラインを併用する人はいない"],c:2,e:"온라인 구매는 편리하지만 실물을 직접 확인할 수 없다는 단점이 있다고 설명합니다."}
+],
+N1:[{text:"情報が容易に手に入る時代において、知識を多く蓄えることの価値は相対的に低下したと言えるかもしれない。しかし、情報を持っていることと、それを状況に応じて意味づけ、判断に結びつけることとは別である。むしろ情報が氾濫する現代だからこそ、何を選び、何を捨てるかという判断力が問われている。",q:"筆者によると、現代に特に必要とされる能力は何か。",a:["情報をすべて記憶する能力","情報を速く検索する能力","情報を選択し判断に生かす能力","専門知識を避ける能力","情報を他人に伝えない能力"],c:2,e:"정보가 넘치는 시대일수록 무엇을 선택하고 버릴지 판단하는 능력이 중요하다고 말합니다."}]
+};
+let level="N2",tab="vocab",idx=0,selected=-1,checked=false,questions=[],today=0,solved=0,correct=0,wrong=[];
+try{let s=JSON.parse(localStorage.getItem("jlptpass")||"{}");today=s.today||0;solved=s.solved||0;correct=s.correct||0;wrong=s.wrong||[]}catch(e){}
+function save(){localStorage.setItem("jlptpass",JSON.stringify({today,solved,correct,wrong}))}
+function makeQuestions(){if(tab==="vocab")return (db[level]||[]).map(x=>({...x,a:x.opts||x.a,c:x.opts?0:x.c,type:"vocab"}));if(tab==="grammar")return (grammar[level]||[]).map(x=>({...x,w:"문법",r:"",q:x.s,type:"grammar"}));if(tab==="reading"){return (reading[level]||[]).map(x=>({...x,w:"독해 지문",r:"",type:"reading"}))}return wrong.filter(x=>x.level===level)}
+function render(){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));document.getElementById("mainTitle").textContent={vocab:"어휘 5지선다",grammar:"문법 문장 풀이",reading:"독해 지문 풀이",wrong:"오답 노트"}[tab];document.getElementById("mainDesc").textContent={vocab:"JLPT 어휘 문항 유형을 반영한 5지선다 문제입니다.",grammar:"문법 형식 판단과 문장 구성 문제를 풀어보세요.",reading:"단문·중문 독해의 핵심 내용과 세부 정보를 파악하세요.",wrong:"틀린 문제를 다시 풀어보세요."}[tab];document.getElementById("levelLabel").textContent=level+" "+({vocab:"어휘",grammar:"문법",reading:"독해",wrong:"오답"}[tab]);questions=makeQuestions();idx=Math.min(idx,Math.max(0,questions.length-1));selected=-1;checked=false;draw()}
+function draw(){document.getElementById("todayCount").textContent=today;document.getElementById("accuracy").textContent=solved?Math.round(correct/solved*100)+"%":"-";document.getElementById("wrongCount").textContent=wrong.length;document.getElementById("totalSolved").textContent=solved+"문제";document.getElementById("totalCorrect").textContent=correct+"문제";document.getElementById("wrongTotal").textContent=wrong.length+"문제";document.getElementById("currentLevel").textContent=level;document.getElementById("qCount").textContent=questions.length?`문제 ${idx+1} / ${questions.length}`:"문제 없음";document.getElementById("bar").style.width=questions.length?((idx+1)/questions.length*100)+"%":"0%";
+let root=document.getElementById("quiz");if(!questions.length){root.innerHTML='<div class="empty">이 등급의 문제 또는 오답이 아직 없습니다.<br><br>다른 학습 메뉴나 등급을 선택해 주세요.</div>';return}
+let q=questions[idx];let title=q.type==="vocab"?`<div class="small muted" style="text-align:center">${q.kind||"어휘 · 문맥 규정"}</div><div class="word">${q.display||q.w}</div><div class="reading">${q.r||""}</div><div class="question" style="text-align:center">${q.prompt||"다음 단어의 의미로 가장 적절한 것을 고르세요."}</div>`:q.type==="grammar"?`<div class="grammarline">${q.s.replace("（　）","<u>（　）</u>")}</div><div class="question">빈칸에 들어갈 가장 적절한 표현을 고르세요.</div>`:`<div class="question">다음 글을 읽고 질문에 답하세요.</div><div class="readingtext">${q.text}</div><b>${q.q}</b>`;
+root.innerHTML=title+`<div class="choices">${q.a.map((a,i)=>`<button class="choice ${selected===i?"selected":""} ${checked&&i===q.c?"correct":""} ${checked&&selected===i&&i!==q.c?"wrong":""}" data-i="${i}" ${checked?"disabled":""}><span class="num">${i+1}</span><span>${a}</span></button>`).join("")}</div><div class="explain ${checked?"show":""}">${checked?(selected===q.c?'<strong>정답입니다!</strong>':'<strong style="color:var(--red)">오답입니다. 정답: '+q.a[q.c]+'</strong>')+'<br>'+q.e:''}</div><div class="actions">${checked?'<button class="secondary" id="again">다시 풀기</button><button class="primary" id="next">다음 문제 →</button>':'<button class="primary" id="submit" '+(selected<0?'disabled':'')+'>정답 확인</button>'}</div>`;
+root.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{if(!checked){selected=+b.dataset.i;draw()}});let sub=document.getElementById("submit");if(sub)sub.onclick=()=>{if(selected<0)return;checked=true;solved++;today++;if(selected===q.c)correct++;else{if(!wrong.some(x=>x.w===q.w&&x.level===level&&x.type===q.type))wrong.push({...q,level});}save();draw()};let next=document.getElementById("next");if(next)next.onclick=()=>{idx=(idx+1)%questions.length;selected=-1;checked=false;draw()};let again=document.getElementById("again");if(again)again.onclick=()=>{selected=-1;checked=false;draw()};
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;idx=0;render()});
+document.getElementById("levels").innerHTML=["N5","N4","N3","N2","N1"].map(x=>`<button class="level ${x===level?"active":""}" data-l="${x}">${x}</button>`).join("");
+document.querySelectorAll(".level").forEach(b=>b.onclick=()=>{level=b.dataset.l;document.querySelectorAll(".level").forEach(x=>x.classList.toggle("active",x===b));idx=0;render()});
+document.getElementById("mode").onchange=e=>{if(e.target.value==="wrong")tab="wrong";else if(tab==="wrong")tab="vocab";idx=0;render()};
+render();
+</script></body></html>
