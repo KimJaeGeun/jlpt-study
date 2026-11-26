@@ -502,6 +502,34 @@ function japanese(text, level) {
   return withReading.replace(/\[\[([^\[\]]+)\]\]/g, '<u class="question-target">$1</u>');
 }
 
+function questionPrompt(question) {
+  if (question.type === "reading") return question.q;
+
+  const beginner = question.level === "N5" || question.level === "N4";
+  if (question.type === "grammar") {
+    if (question.kind === "문장 구성") return "手順を自然な順序に並べてください。";
+    return beginner ? "（　）に なにを いれますか。" :
+      "（　）に{入|はい}る{最|もっと}も{自然|しぜん}なものを{選|えら}びなさい。";
+  }
+
+  if (question.readingTest) {
+    return beginner ? "せんが ひいてある ことばは、ひらがなで どう かきますか。" :
+      "{下線部|かせんぶ}の{読|よ}み{方|かた}を{選|えら}びなさい。";
+  }
+  if (question.orthographyTest) {
+    return beginner ? "せんが ひいてある ことばは、かんじで どう かきますか。" :
+      "{下線部|かせんぶ}のことばの{漢字表記|かんじひょうき}を{選|えら}びなさい。";
+  }
+  if (question.kind === "유의어") return "下線部とほぼ同じ意味の表現を選びなさい。";
+  if (question.kind === "용법" || question.kind === "문맥 어휘" || question.kind === "문맥 규정") {
+    return beginner ? "（　）に はいる いちばん いい ことばは どれですか。" :
+      "（　）に{入|はい}る{最|もっと}も{適切|てきせつ}なことばを{選|えら}びなさい。";
+  }
+
+  return beginner ? "この ことばの かんこくごの いみは どれですか。" :
+    "このことばの{意味|いみ}に{合|あ}う{韓国語|かんこくご}を{選|えら}びなさい。";
+}
+
 function render() {
   const profile = onCurrentDay(state);
   const { view, level, selected, checked, today, solved, correct, accuracyBase } = profile;
@@ -549,8 +577,7 @@ function render() {
 
   const vocabulary = question.type === "vocab";
   const heading = vocabulary ? question.display || question.w : question.s || question.text;
-  const prompt = vocabulary ? question.prompt || "단어의 뜻을 고르세요." :
-    question.q || "빈칸에 들어갈 가장 적절한 표현을 고르세요.";
+  const prompt = questionPrompt(question);
   const testsTarget = question.readingTest || question.orthographyTest || question.kind === "문맥 어휘";
   const reading = vocabulary && question.r && introductory.includes(level) && (!testsTarget || checked)
     ? '<div class="reading">' + escapeHtml(question.r) + '</div>' : "";
@@ -573,7 +600,7 @@ function render() {
     '<button class="primary" id="submit"' + (selected < 0 ? " disabled" : "") + '>정답 확인</button>';
 
   root.innerHTML = '<div class="' + headingClass + '" lang="ja">' + japanese(heading, level) + '</div>' +
-    reading + '<div class="question">' + japanese(prompt, level) + '</div><div class="choices">' +
+    reading + '<div class="question" lang="ja">' + japanese(prompt, level) + '</div><div class="choices">' +
     choices + '</div>' + explanation + '<div class="actions">' + buttons + '</div>';
   for (const button of root.querySelectorAll(".choice")) {
     button.onclick = () => {
