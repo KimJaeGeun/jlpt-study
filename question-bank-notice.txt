@@ -1,13 +1,13 @@
 JLPT PASS 문제은행
 등급마다 어휘 1,000문항, 문법 500문항, 독해 500문항을 제공합니다.
-어휘와 문법 일부 보기는 자료의 영어 뜻과 용례를 사용합니다.
+어휘는 한자 읽기·표기·문맥 어휘, 문법은 일본어 빈칸 완성 문제 중심으로 구성했습니다.
 독해 추가 문항은 연습용으로 작성한 지문과 문항이며, 공지문과 지역 시설 운영을 소재로 여러 변형을 만들었습니다.
 시험 비율 연습의 어휘·문법·독해 수량은 JLPT 공식 가이드북의 등급별 근사 문항 수를 기준으로 합니다.
 https://www.jlpt.jp/e/reference/pdf/guidebook_s_e.pdf
 
 bank-data.js의 보충 문항 데이터는 CC BY-SA 4.0으로 배포합니다.
 https://creativecommons.org/licenses/by-sa/4.0/
-OpenJLPT 어휘 및 문법 데이터를 선별하고, 뜻·읽기·문형 연습 문제와 선택지로 변환했습니다.
+OpenJLPT 어휘 및 문법 데이터를 선별하고, 읽기·표기·문맥·문형 연습 문제와 선택지로 변환했습니다.
 https://github.com/wjdartmouth/JLPT/tree/0d1d3410bec90bd4098a7c72de820543cb4f707c
 OpenJLPT 원본 및 기여자 안내
 https://github.com/wjdartmouth/JLPT/blob/0d1d3410bec90bd4098a7c72de820543cb4f707c/NOTICE.md
@@ -16,5 +16,5 @@ https://www.tanos.co.uk/jlpt/
 EDRDG JMdict 및 KANJIDIC2
 https://www.edrdg.org/edrdg/licence.html
 Tatoeba
-https://tatoeba.org/
+https://tatoeba.org/\n문맥 문제의 원문과 기여자는 https://tatoeba.org/sentences/show/<sourceId> 에서 확인할 수 있습니다. Tatoeba 용례는 CC BY 2.0 FR입니다.\nhttps://creativecommons.org/licenses/by/2.0/fr/
 문법 용례 및 요미가나: OpenJLPT 기여자
