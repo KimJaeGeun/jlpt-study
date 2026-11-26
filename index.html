@@ -33,18 +33,23 @@ footer{text-align:center;color:#9aa4b5;font-size:11px;margin:22px 0}
 .profile__import{margin-top:10px;font-size:14px}.profile__import summary{cursor:pointer}
 .profile__import button,.profile__import input{margin-top:10px}.profile button:disabled{opacity:.45;cursor:not-allowed}
 [hidden]{display:none!important}
+.profile .error{color:#b42231}.spinner{display:inline-block;width:1rem;height:1rem;margin-top:12px;border:2px solid #cad6f7;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+#resetAccuracy{margin-top:10px}
 </style>
 </head>
 <body><div class="app">
 <header><div><div class="brand">JLPT <span>PASS</span></div><div class="sub">일본어 능력시험 합격 학습 플랫폼</div></div><div class="topright"><div class="pill">🎯 목표 등급 <b id="goalLabel">N2</b></div></div></header>
-<section class="hero"><div><h1>오늘도 한 단계 합격에 가까워지기</h1><p>N5부터 N1까지, 어휘 · 문법 · 독해를 체계적으로 학습하세요.</p></div><div class="tag">현재 집중 등급　<b>N2</b></div></section>
+<section class="hero"><div><h1>오늘도 한 단계 합격에 가까워지기</h1><p>N5부터 N1까지, 어휘 · 문법 · 독해를 체계적으로 학습하세요.</p></div><div class="tag">현재 집중 등급　<b id="focusLevel">N2</b></div></section>
 <div class="panel profile">
 <form id="profileForm" autocomplete="off">
 <label for="username">유저명</label>
 <input id="username" type="text" maxlength="32" required>
-<button class="primary" id="loadProfile">기록 불러오기</button>
+<button class="primary" id="loadProfile" disabled>기록 불러오기</button>
 </form>
-<p class="muted" id="profileStatus" role="status">유저명을 입력하면 이전에 풀던 문제부터 이어서 공부할 수 있어요.</p>
+<span id="appBusy" class="spinner" aria-hidden="true"></span>
+<p class="muted" id="profileStatus" role="status">문제은행을 불러오는 중이에요.</p>
 <details id="legacyImport" class="profile__import" hidden>
 <summary>이전 브라우저 기록 가져오기</summary>
 <button class="secondary" id="importLocal" type="button" hidden>이 브라우저의 기록 가져오기</button>
@@ -52,18 +57,19 @@ footer{text-align:center;color:#9aa4b5;font-size:11px;margin:22px 0}
 <input id="importFile" type="file" accept=".json,application/json">
 </details>
 </div>
-<nav class="tabs" id="studyTabs" inert><button class="tab active" data-tab="vocab">📚 어휘</button><button class="tab" data-tab="grammar">✍️ 문법</button><button class="tab" data-tab="reading">📖 독해</button><button class="tab" data-tab="wrong">↻ 오답 노트</button></nav>
-<div class="layout" id="study" inert><main class="panel">
-<div class="sectionhead"><div><h2 id="mainTitle">어휘 5지선다</h2><div class="muted small" id="mainDesc">단어의 의미를 정확하게 골라보세요.</div></div><select id="mode"><option value="new">미풀이 랜덤</option><option value="wrong">오답 복습</option></select></div>
-<div class="stats"><div class="stat"><span>오늘 푼 문제</span><b id="todayCount">0</b></div><div class="stat"><span>정답률</span><b id="accuracy">-</b></div><div class="stat"><span>누적 오답</span><b id="wrongCount">0</b></div></div>
+<nav class="tabs" id="studyTabs" hidden inert><button class="tab active" data-tab="vocab">📚 어휘</button><button class="tab" data-tab="grammar">✍️ 문법</button><button class="tab" data-tab="reading">📖 독해</button><button class="tab" data-tab="exam">시험 비율 연습</button><button class="tab" data-tab="wrong">↻ 오답 노트</button></nav>
+<div class="layout" id="study" hidden inert><main class="panel">
+<div class="sectionhead"><div><h2 id="mainTitle">어휘</h2><div class="muted small" id="mainDesc">단어의 의미를 정확하게 골라보세요.</div></div></div>
+<div class="stats"><div class="stat"><span>오늘 푼 문제</span><b id="todayCount">0</b></div><div class="stat"><span>정답률</span><b id="accuracy">-</b></div><div class="stat"><span>이 등급 오답</span><b id="wrongCount">0</b></div></div>
 <div class="sectionhead"><span class="small muted" id="qCount">문제 1</span><span class="small muted" id="levelLabel">N2 어휘</span></div><div class="progress"><i id="bar"></i></div>
 <div id="quiz"></div>
 </main><aside>
 <div class="panel sidebox"><h3>학습 등급 선택</h3><div class="levelgrid" id="levels"></div><p class="small muted" style="margin:11px 0 0">전체 등급을 지원하며 N2가 기본 선택입니다.</p></div>
-<div class="panel sidebox"><h3>나의 학습 현황</h3><div class="sideitem"><span>누적 풀이</span><b id="totalSolved">0문제</b></div><div class="sideitem"><span>정답</span><b id="totalCorrect">0문제</b></div><div class="sideitem"><span>오답 노트</span><b id="wrongTotal">0문제</b></div><div class="sideitem"><span>선택 등급</span><b id="currentLevel">N2</b></div></div>
-<div class="panel sidebox"><h3>문제은행 안내</h3><p class="small muted" style="line-height:1.8;margin:0">문항은 JLPT 공식 공개 자료의 문제 유형과 평가 목적을 참고해 새로 작성한 연습문제입니다. 실제 기출 원문을 복제하지 않으며, 등급별·유형별 문제은행을 계속 확장할 수 있습니다.</p></div>
+<div class="panel sidebox"><h3>나의 학습 현황</h3><div class="sideitem"><span>연속 학습</span><b id="streak">0일</b></div><div class="sideitem"><span>누적 풀이</span><b id="totalSolved">0문제</b></div><div class="sideitem"><span>정답</span><b id="totalCorrect">0문제</b></div><div class="sideitem"><span>오답 노트</span><b id="wrongTotal">0문제</b></div><div class="sideitem"><span>선택 등급</span><b id="currentLevel">N2</b></div><button type="button" class="secondary" id="resetAccuracy">정답률 초기화</button></div>
+<div class="panel sidebox"><h3>문제은행 안내</h3><p class="small muted" style="line-height:1.8;margin:0">등급별 어휘 1,000문항, 문법·독해 각 500문항의 연습 문제입니다. <a href="./question-bank-notice.txt">문제은행 출처</a></p></div>
 </aside></div>
-<footer>JLPT PASS · N2 집중 학습 · 학습 기록은 유저명별로 저장됩니다.</footer></div>
+<footer>JLPT PASS · 학습 기록은 유저명별로 저장됩니다.</footer></div>
+<script src="./bank-data.js" onerror="document.getElementById('profileStatus').textContent='문제은행을 불러오지 못했어요. 새로고침해 주세요.'; document.getElementById('appBusy').hidden=true"></script>
 <script>
 const db={
 N5:[
@@ -99,9 +105,9 @@ N1:[
 {w:"妥協",r:"だきょう",q:"타협",a:["대립","타협","강요","거부","독립"],c:1,e:"妥協（だきょう）는 서로 양보하여 의견을 맞추는 것입니다."}]
 };
 const grammar={
-N5:[{s:"毎朝、コーヒー（　）飲みます。",a:["を","に","が","で","へ"],c:0,e:"목적어를 나타내는 조사 を가 정답입니다."},{s:"日曜日（　）友達と映画を見ました。",a:["に","を","が","で","へ"],c:0,e:"특정 날짜를 나타낼 때 に를 사용합니다."}],
-N4:[{s:"雨が降っている（　）、出かけました。",a:["のに","ので","ために","ように","ばかり"],c:0,e:"のに는 예상과 반대되는 결과를 나타내며 '~인데도'라는 뜻입니다."},{s:"日本へ行く（　）、パスポートを用意してください。",a:["ときは","ところで","あいだに","ばかりに","うちを"],c:0,e:"어떤 일을 할 때를 나타내는 ときは가 자연스럽습니다."}],
-N3:[{s:"忙しくて、昼ご飯を食べる時間（　）なかった。",a:["さえ","ほど","だけ","まで","しか"],c:0,e:"時間さえなかった는 시간조차 없었다는 의미입니다."},{s:"説明書をよく読んでから、機械を使う（　）にしてください。",a:["よう","そう","ため","こと","もの"],c:0,e:"～ようにしてください는 '~하도록 해 주세요'라는 요청 표현입니다."}],
+N5:[{s:"{毎朝|まいあさ}、コーヒー（　）飲みます。",a:["を","に","が","で","へ"],c:0,e:"목적어를 나타내는 조사 を가 정답입니다."},{s:"{日曜日|にちようび}（　）{友達|ともだち}と{映画|えいが}を{見|み}ました。",a:["に","を","が","で","へ"],c:0,e:"특정 날짜를 나타낼 때 に를 사용합니다."}],
+N4:[{s:"{雨|あめ}が{降|ふ}っている（　）、{出|で}かけました。",a:["のに","ので","ために","ように","ばかり"],c:0,e:"のに는 예상과 반대되는 결과를 나타내며 '~인데도'라는 뜻입니다."},{s:"{日本|にほん}へ{行|い}く（　）、パスポートを{用意|ようい}してください。",a:["ときは","ところで","あいだに","ばかりに","うちを"],c:0,e:"어떤 일을 할 때를 나타내는 ときは가 자연스럽습니다."}],
+N3:[{s:"{忙|いそが}しくて、{昼|ひる}ご{飯|はん}を{食|た}べる{時間|じかん}（　）なかった。",a:["さえ","ほど","だけ","まで","しか"],c:0,e:"時間さえなかった는 시간조차 없었다는 의미입니다."},{s:"{説明書|せつめいしょ}をよく{読|よ}んでから、{機械|きかい}を{使|つか}う（　）にしてください。",a:["よう","そう","ため","こと","もの"],c:0,e:"～ようにしてください는 '~하도록 해 주세요'라는 요청 표현입니다."}],
 N2:[
 {s:"彼は経験が豊富な（　）、今回の仕事には向いていない。",a:["だけあって","一方で","ことから","末に","に限って"],c:1,e:"一方で는 한편으로는이라는 뜻으로 앞뒤의 대조를 나타냅니다."},
 {s:"計画を変更する（　）、関係者全員に連絡する必要がある。",a:["にあたって","に反して","に沿って","に限らず","を問わず"],c:0,e:"にあたって는 어떤 일을 실행함에 있어서라는 뜻입니다."},
@@ -115,9 +121,9 @@ N1:[
 {s:"計画の実現は、関係者の協力（　）不可能だろう。",a:["なしには","に先立ち","を皮切りに","に即して","と相まって"],c:0,e:"なしには는 '~없이는'이라는 뜻으로 필수 조건을 나타냅니다."}]
 };
 const reading={
-N5:[{text:"わたしは毎朝六時に起きます。朝ご飯を食べて、七時に家を出ます。学校まで電車で三十分かかります。",q:"学校までどのくらいかかりますか。",a:["十分","二十分","三十分","一時間","二時間"],c:2,e:"본문에 学校まで電車で三十分かかります라고 나와 있습니다."}],
-N4:[{text:"田中さんは先月、新しい仕事を始めました。仕事は忙しいですが、毎日いろいろなことを学べるので楽しいと言っています。",q:"田中さんは新しい仕事についてどう思っていますか。",a:["簡単すぎる","忙しいが楽しい","給料が低い","やめたい","前の仕事より暇だ"],c:1,e:"忙しいですが…楽しい라고 했으므로 바쁘지만 즐겁다고 생각합니다."}],
-N3:[{text:"最近、地域の図書館を利用する人が減っている。一方で、図書館を勉強や仕事の場所として利用する若者は増えている。図書館には本を読む場所という役割だけでなく、人々が集まる場所としての役割も期待されている。",q:"筆者が図書館に期待していることは何か。",a:["本の数を減らすこと","若者だけが利用すること","人々が集まる場所になること","営業時間を短くすること","仕事を禁止すること"],c:2,e:"마지막 문장에서 사람들이 모이는 장소로서의 역할도 기대한다고 설명합니다."}],
+N5:[{text:"わたしは{毎朝|まいあさ}{六時|ろくじ}に{起|お}きます。{朝|あさ}ご{飯|はん}を{食|た}べて、{七時|しちじ}に{家|いえ}を{出|で}ます。{学校|がっこう}まで{電車|でんしゃ}で{三十分|さんじゅっぷん}かかります。",q:"学校までどのくらいかかりますか。",a:["十分","二十分","三十分","一時間","二時間"],c:2,e:"본문에 学校まで電車で三十分かかります라고 나와 있습니다."}],
+N4:[{text:"{田中|たなか}さんは{先月|せんげつ}、{新|あたら}しい{仕事|しごと}を{始|はじ}めました。{仕事|しごと}は{忙|いそが}しいですが、{毎日|まいにち}いろいろなことを{学|まな}べるので{楽|たの}しいと{言|い}っています。",q:"田中さんは新しい仕事についてどう思っていますか。",a:["簡単すぎる","忙しいが楽しい","給料が低い","やめたい","前の仕事より暇だ"],c:1,e:"忙しいですが…楽しい라고 했으므로 바쁘지만 즐겁다고 생각합니다."}],
+N3:[{text:"{最近|さいきん}、{地域|ちいき}の{図書館|としょかん}を{利用|りよう}する{人|ひと}が{減|へ}っている。{一方|いっぽう}で、{図書館|としょかん}を{勉強|べんきょう}や{仕事|しごと}の{場所|ばしょ}として{利用|りよう}する{若者|わかもの}は{増|ふ}えている。{図書館|としょかん}には{本|ほん}を{読|よ}む{場所|ばしょ}という{役割|やくわり}だけでなく、{人々|ひとびと}が{集|あつ}まる{場所|ばしょ}としての{役割|やくわり}も{期待|きたい}されている。",q:"筆者が図書館に期待していることは何か。",a:["本の数を減らすこと","若者だけが利用すること","人々が集まる場所になること","営業時間を短くすること","仕事を禁止すること"],c:2,e:"마지막 문장에서 사람들이 모이는 장소로서의 역할도 기대한다고 설명합니다."}],
 N2:[
 {text:"新しい技術が導入されると、仕事の効率が上がることが多い。しかし、技術を導入するだけで問題が解決するわけではない。使う人が目的を理解し、状況に応じて適切に活用できて初めて、その効果が十分に発揮される。つまり、技術そのものよりも、それをどのように使うかが重要なのである。",q:"筆者が最も言いたいことは何か。",a:["新技術はできるだけ早く導入すべきだ","技術の導入だけで仕事の問題は解決する","技術は高価なほど効果が高い","技術を使う目的や方法が重要だ","仕事の効率は技術と関係がない"],c:3,e:"기술 자체보다 목적을 이해하고 어떻게 활용하는지가 중요하다고 강조합니다."},
 {text:"ある会社では、社員の意見を集めるために定期的なアンケートを実施している。しかし、回答を集めるだけでは職場の改善にはつながらない。寄せられた意見を分析し、実行できるものから具体的な対策を取り、その結果を社員に知らせることが重要だ。意見を出しても何も変わらないと感じれば、社員は次第に協力しなくなるだろう。",q:"筆者によると、アンケートを職場改善に役立てるために必要なことは何か。",a:["回答数をできるだけ増やすこと","匿名で回答できないようにすること","意見を分析し、対策と結果を共有すること","毎週アンケートを実施すること","社員に回答を強制すること"],c:2,e:"의견을 분석해 구체적인 대책을 실행하고 결과를 직원에게 알리는 것이 중요하다고 했습니다."},
@@ -128,14 +134,17 @@ N1:[{text:"情報が容易に手に入る時代において、知識を多く蓄
 const $ = id => document.getElementById(id);
 const levels = ["N5", "N4", "N3", "N2", "N1"];
 const bank = { vocab: db, grammar, reading };
+const parts = Object.keys(bank);
+const labels = { vocab: "어휘", grammar: "문법", reading: "독해", wrong: "오답 노트", exam: "시험 비율 연습" };
+const quotas = { N1: [25, 20, 26], N2: [32, 22, 21], N3: [35, 23, 16], N4: [35, 25, 10], N5: [35, 26, 6] };
 const questionsById = new Map();
+const introductory = ["N5", "N4", "N3"];
 for (const [type, groups] of Object.entries(bank)) {
-  for (const [level, entries] of Object.entries(groups)) {
-    groups[level] = entries.map((entry, index) => {
-      const question = {
-        ...entry, type, level, id: `${level}:${type}:${index}`,
-        a: entry.opts || entry.a, c: entry.opts ? 0 : entry.c,
-      };
+  for (const [level, original] of Object.entries(groups)) {
+    groups[level] = [...original, ...supplementalBank[type][level]].map((entry, index) => {
+      const question = { ...entry, type, level, index, id: [level, type, index].join(":"),
+        a: entry.opts || entry.a, c: entry.opts ? entry.opts.indexOf(entry.r) : entry.c };
+      question.readingTest = Boolean(entry.opts || entry.readingTest);
       questionsById.set(question.id, question);
       return question;
     });
@@ -145,45 +154,107 @@ for (const [type, groups] of Object.entries(bank)) {
 const studyDate = () => new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
 }).format(new Date());
+
+function previousDay(day) {
+  return new Date(Date.parse(day) - 86400000).toISOString().slice(0, 10);
+}
+
 const initialState = () => ({
-  level: "N2", tab: "vocab", mode: "new", idx: -1, selected: -1, checked: false,
+  level: "N2", tab: "vocab", mode: "new", view: "vocab", idx: -1, selected: -1, checked: false,
   today: 0, day: studyDate(), solved: 0, correct: 0, wrong: [], solvedIds: [],
+  rounds: {}, mistakes: {}, lastStudyDay: "", streak: 0, accuracyBase: [0, 0],
+  questionId: null, order: [], exam: null,
 });
 let state = initialState();
-let username = "", revision = 0, busy = false, questions = [];
+let username = "";
+let revision = 0;
+let busy = false;
 
-function makeQuestions({ tab, level, wrong }) {
-  if (tab !== "wrong") return bank[tab][level] || [];
-  return wrong.map(id => questionsById.get(id)).filter(question => question?.level === level);
+function shuffled(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const swap = Math.floor(Math.random() * (i + 1));
+    [result[i], result[swap]] = [result[swap], result[i]];
+  }
+  return result;
 }
 
-function randomIndex(profile, previousIndex = -1) {
-  const pool = makeQuestions(profile);
-  const solvedIds = new Set(profile.solvedIds);
-  const candidates = pool.flatMap((question, index) =>
-    profile.tab === "wrong" || !solvedIds.has(question.id) ? [index] : []);
-  const remaining = candidates.length > 1 ? candidates.filter(index => index !== previousIndex) : candidates;
-  return remaining.length ? remaining[Math.floor(Math.random() * remaining.length)] : -1;
+const group = question => question.level + ":" + question.type;
+
+function readBits(records, key) {
+  return Uint8Array.from(atob(records[key] || ""), character => character.charCodeAt(0));
 }
 
-function restoreProfile(saved) {
-  const profile = onCurrentDay(saved || initialState());
-  profile.mode = profile.tab === "wrong" ? "wrong" : "new";
-  const question = makeQuestions(profile)[profile.idx];
-  if (!Array.isArray(profile.solvedIds)) {
-    profile.solvedIds = [...new Set([
-      ...profile.wrong,
-      ...(profile.checked && question ? [question.id] : []),
-    ])];
-    if (!profile.checked) profile.idx = -1;
+function hasBit(bits, index) {
+  return Boolean(bits[index >> 3] & (1 << (index & 7)));
+}
+
+function mark(records, question, enabled = true) {
+  const key = group(question);
+  const previous = readBits(records, key);
+  const position = question.index >> 3;
+  const bytes = new Uint8Array(Math.max(previous.length, position + 1));
+  bytes.set(previous);
+  const mask = 1 << (question.index & 7);
+  bytes[position] = enabled ? bytes[position] | mask : bytes[position] & ~mask;
+  return { ...records, [key]: btoa(String.fromCharCode(...bytes)) };
+}
+
+function migrateIds(ids) {
+  return ids.reduce((records, id) => {
+    const question = questionsById.get(id);
+    return question ? mark(records, question) : records;
+  }, {});
+}
+
+function reviewPool(profile) {
+  return parts.flatMap(part => {
+    const bits = readBits(profile.mistakes, profile.level + ":" + part);
+    return bank[part][profile.level].filter(question => hasBit(bits, question.index));
+  });
+}
+
+function drawUnsolved(profile, part, count = 1, previousId = null) {
+  const questions = bank[part][profile.level];
+  const key = profile.level + ":" + part;
+  let bits = readBits(profile.rounds, key);
+  const picked = [];
+  while (picked.length < count) {
+    const pickedIds = new Set(picked.map(question => question.id));
+    let available = questions.filter(question => !pickedIds.has(question.id) && !hasBit(bits, question.index));
+    if (!available.length) {
+      profile.rounds = { ...profile.rounds, [key]: "" };
+      bits = new Uint8Array();
+      available = questions.filter(question => !pickedIds.has(question.id));
+    }
+    if (available.length > 1 && previousId) available = available.filter(question => question.id !== previousId);
+    picked.push(...shuffled(available).slice(0, count - picked.length));
   }
-  if (!question || profile.idx === -1 ||
-      (!profile.checked && profile.tab !== "wrong" && profile.solvedIds.includes(question.id))) {
-    profile.idx = randomIndex(profile);
-    profile.selected = -1;
-    profile.checked = false;
+  return picked;
+}
+
+function choiceOrder(question, requiredChoice = -1) {
+  if (!question) return [];
+  const distractors = shuffled(question.a.map((_, index) => index).filter(index => index !== question.c));
+  if (requiredChoice !== -1 && requiredChoice !== question.c) {
+    return shuffled([question.c, requiredChoice, ...distractors.filter(index => index !== requiredChoice).slice(0, 2)]);
   }
-  return profile;
+  return shuffled([question.c, ...distractors.slice(0, 3)]);
+}
+
+function setQuestion(profile, question, index = question?.index ?? -1) {
+  profile.questionId = question?.id ?? null;
+  profile.idx = index;
+  profile.selected = -1;
+  profile.checked = false;
+  profile.order = choiceOrder(question);
+}
+
+function startExam(profile) {
+  profile.exam = { questions: parts.flatMap((part, index) =>
+    drawUnsolved(profile, part, quotas[profile.level][index]).map(question => question.id)),
+    position: 0, correct: 0 };
+  setQuestion(profile, questionsById.get(profile.exam.questions[0]), 0);
 }
 
 function onCurrentDay(saved) {
@@ -191,18 +262,50 @@ function onCurrentDay(saved) {
   return saved.day === day ? saved : { ...saved, day, today: 0 };
 }
 
-function setBusy(value) {
-  busy = value;
-  $("loadProfile").disabled = value;
-  $("username").disabled = value;
-  $("importFile").disabled = value;
-  $("importLocal").disabled = value;
-  $("study").inert = value || !username;
-  $("studyTabs").inert = value || !username;
+function restoreProfile(saved) {
+  const profile = onCurrentDay({ ...initialState(), ...saved });
+  profile.view = saved?.view || profile.tab;
+  if (!saved?.rounds) profile.rounds = migrateIds(saved?.solvedIds || []);
+  if (!saved?.mistakes) profile.mistakes = migrateIds(saved?.wrong || []);
+  if (!saved?.lastStudyDay && saved?.today > 0) {
+    profile.lastStudyDay = saved.day;
+    profile.streak = 1;
+  }
+
+  let question = questionsById.get(profile.questionId);
+  if (!question && !saved?.view && profile.idx >= 0) {
+    question = profile.tab === "wrong"
+      ? questionsById.get(saved.wrong?.filter(id => id.startsWith(profile.level + ":"))[profile.idx])
+      : bank[profile.tab]?.[profile.level]?.[profile.idx];
+  }
+  if (question) {
+    profile.questionId = question.id;
+    const validOrder = Array.isArray(profile.order) && profile.order.length === 4 &&
+      new Set(profile.order).size === 4 && profile.order.includes(question.c) &&
+      profile.order.every(index => Number.isInteger(index) && index >= 0 && index < question.a.length);
+    if (!validOrder) profile.order = choiceOrder(question, profile.checked ? profile.selected : -1);
+  } else if (profile.view === "wrong") {
+    setQuestion(profile, shuffled(reviewPool(profile))[0], 0);
+  } else if (profile.view !== "exam") {
+    setQuestion(profile, drawUnsolved(profile, profile.view)[0]);
+  }
+  return profile;
 }
 
-function report(message) {
+function setBusy(value) {
+  busy = value;
+  for (const id of ["loadProfile", "username", "importFile", "importLocal", "resetAccuracy"]) $(id).disabled = value;
+  for (const id of ["study", "studyTabs"]) {
+    $(id).inert = value || !username;
+    $(id).hidden = !username;
+  }
+  $("appBusy").hidden = !value;
+  $("profileForm").setAttribute("aria-busy", String(value));
+}
+
+function report(message, error = false) {
   $("profileStatus").textContent = message;
+  $("profileStatus").classList.toggle("error", error);
 }
 
 async function requestRecord(name, options) {
@@ -238,7 +341,7 @@ $("profileForm").onsubmit = async event => {
     report(revision ? username + "님의 기록을 불러왔어요." : username + "님, 첫 학습을 시작해 보세요.");
     render();
   } catch (error) {
-    report(error.message || "학습 기록을 불러오지 못했어요.");
+    report(error.message || "학습 기록을 불러오지 못했어요.", true);
   } finally {
     setBusy(false);
   }
@@ -255,12 +358,12 @@ async function save(next) {
       body: JSON.stringify({ revision, state: next }),
     });
     revision = record.revision;
-    state = next.idx === -1 ? restoreProfile(next) : next;
+    state = next;
     $("legacyImport").hidden = true;
     report(username + "님의 학습 기록이 저장됐어요.");
     render();
   } catch (error) {
-    report(error.message || "저장에 실패했어요. 같은 동작을 다시 시도해 주세요.");
+    report(error.message || "저장에 실패했어요. 같은 동작을 다시 시도해 주세요.", true);
   } finally {
     setBusy(false);
   }
@@ -288,16 +391,18 @@ function importLegacy(record) {
     if (!original || !levels.includes(original.level) ||
         !["vocab", "grammar", "reading"].includes(original.type)) continue;
     const question = (bank[original.type]?.[original.level] || []).find(candidate => {
-      if (candidate.type === "grammar") return candidate.s === original.s;
-      if (candidate.type === "reading") return candidate.text === original.text && candidate.q === original.q;
+      if (candidate.type === "grammar") return stripReading(candidate.s) === original.s;
+      if (candidate.type === "reading") return stripReading(candidate.text) === original.text && candidate.q === original.q;
       return candidate.w === original.w && candidate.q === original.q;
     });
     if (question) wrong.add(question.id);
   }
-  save({
-    ...initialState(), solved: record.solved, correct: record.correct, wrong: [...wrong], solvedIds: [...wrong],
+  const profile = restoreProfile({
+    ...initialState(), solved: record.solved, correct: record.correct,
+    mistakes: migrateIds([...wrong]), rounds: migrateIds([...wrong]),
     today: Number.isSafeInteger(record.today) && record.today >= 0 && record.today <= record.solved ? record.today : 0,
   });
+  save(profile);
 }
 
 $("importLocal").onclick = () => importLegacy(localLegacyRecord());
@@ -315,64 +420,166 @@ $("importFile").onchange = async event => {
   }
 };
 
-function changePosition(changes, reviewAgain = false) {
-  const current = onCurrentDay(state);
-  const next = { ...current, ...changes, selected: -1, checked: false };
-  next.mode = next.tab === "wrong" ? "wrong" : "new";
-  const samePool = current.level === next.level && current.tab === next.tab;
-  next.idx = reviewAgain ? current.idx : randomIndex(next, samePool ? current.idx : -1);
-  save(next);
+
+function changePosition(view = state.view, level = state.level, action = "next") {
+  const next = { ...onCurrentDay(state), level, view,
+    tab: view === "exam" ? "vocab" : view, mode: view === "wrong" ? "wrong" : "new" };
+  const previous = questionsById.get(state.questionId);
+
+  if (action === "retry" && previous) {
+    setQuestion(next, previous, state.idx);
+  } else if (view === "exam") {
+    if (level !== state.level || view !== state.view || !state.exam || action === "restart") {
+      startExam(next);
+    } else {
+      const position = state.exam.position + 1;
+      next.exam = { ...state.exam, position };
+      setQuestion(next, questionsById.get(next.exam.questions[position]), position);
+    }
+  } else if (view === "wrong") {
+    const pool = reviewPool(next);
+    const available = pool.length > 1 ? pool.filter(question => question.id !== previous?.id) : pool;
+    setQuestion(next, shuffled(available)[0], 0);
+  } else {
+    setQuestion(next, drawUnsolved(next, view, 1, previous?.id)[0]);
+  }
+  return save(next);
 }
 
 function submitAnswer(question) {
-  if (state.selected < 0 || state.checked) return;
+  if (busy || state.selected < 0 || state.checked) return;
   const current = onCurrentDay(state);
   const isCorrect = current.selected === question.c;
-  const wrong = isCorrect || current.wrong.includes(question.id)
-    ? current.wrong : [...current.wrong, question.id];
-
-  save({
-    ...current, solvedIds: [...new Set([...current.solvedIds, question.id])], checked: true, today: current.today + 1, solved: current.solved + 1,
-    correct: current.correct + Number(isCorrect), wrong,
+  const streak = current.lastStudyDay === current.day ? current.streak :
+    (current.lastStudyDay === previousDay(current.day) ? current.streak + 1 : 1);
+  const exam = current.view === "exam" ? {
+    ...current.exam,
+    correct: current.exam.correct + Number(isCorrect),
+  } : current.exam;
+  return save({
+    ...current, checked: true, today: current.today + 1, solved: current.solved + 1,
+    correct: current.correct + Number(isCorrect), lastStudyDay: current.day, streak, exam,
+    rounds: current.view === "wrong" ? current.rounds : mark(current.rounds, question),
+    mistakes: isCorrect && current.view !== "wrong" ? current.mistakes : mark(current.mistakes, question, !isCorrect),
   });
 }
 
-function render(){const { level, tab, mode } = state; $("mode").value = mode; document.querySelectorAll(".level").forEach(button => button.classList.toggle("active", button.dataset.l === level));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));document.getElementById("mainTitle").textContent={vocab:"어휘 5지선다",grammar:"문법 문장 풀이",reading:"독해 지문 풀이",wrong:"오답 노트"}[tab];document.getElementById("mainDesc").textContent={vocab:"JLPT 어휘 문항 유형을 반영한 5지선다 문제입니다.",grammar:"문법 형식 판단과 문장 구성 문제를 풀어보세요.",reading:"단문·중문 독해의 핵심 내용과 세부 정보를 파악하세요.",wrong:"틀린 문제를 다시 풀어보세요."}[tab];document.getElementById("levelLabel").textContent=level+" "+({vocab:"어휘",grammar:"문법",reading:"독해",wrong:"오답"}[tab]);questions=makeQuestions(state);draw()}
-function draw(){const { level, selected, checked, today, solved, correct, wrong } = onCurrentDay(state);const idx = state.idx;const answeredCount = new Set(state.solvedIds);const completed = questions.filter(question => answeredCount.has(question.id)).length;document.getElementById("todayCount").textContent=today;document.getElementById("accuracy").textContent=solved?Math.round(correct/solved*100)+"%":"-";document.getElementById("wrongCount").textContent=wrong.length;document.getElementById("totalSolved").textContent=solved+"문제";document.getElementById("totalCorrect").textContent=correct+"문제";document.getElementById("wrongTotal").textContent=wrong.length+"문제";document.getElementById("currentLevel").textContent=level;document.getElementById("qCount").textContent=questions.length ? (state.tab === "wrong" ? `오답 ${questions.length}개` : `푼 문제 ${completed} / ${questions.length}`) : "문제 없음";document.getElementById("bar").style.width=questions.length && state.tab !== "wrong" ? (completed / questions.length * 100) + "%" : "0%";
-let root=document.getElementById("quiz");if(!questions.length){root.innerHTML='<div class="empty">이 등급의 문제 또는 오답이 아직 없습니다.<br><br>다른 학습 메뉴나 등급을 선택해 주세요.</div>';return}
-const q = questions[idx];
-if (!q) {
-  root.innerHTML = '<div class="empty">이 등급의 문제를 모두 풀었어요.<br>다른 등급이나 유형을 선택하거나 오답 노트를 복습해 보세요.</div>';
-  return;
-}
-let title=q.type==="vocab"?`<div class="small muted" style="text-align:center">${q.kind||"어휘 · 문맥 규정"}</div><div class="word">${q.display||q.w}</div><div class="reading">${q.r||""}</div><div class="question" style="text-align:center">${q.prompt||"다음 단어의 의미로 가장 적절한 것을 고르세요."}</div>`:q.type==="grammar"?`<div class="grammarline">${q.s.replace("（　）","<u>（　）</u>")}</div><div class="question">빈칸에 들어갈 가장 적절한 표현을 고르세요.</div>`:`<div class="question">다음 글을 읽고 질문에 답하세요.</div><div class="readingtext">${q.text}</div><b>${q.q}</b>`;
-root.innerHTML=title+`<div class="choices">${q.a.map((a,i)=>`<button class="choice ${selected===i?"selected":""} ${checked&&i===q.c?"correct":""} ${checked&&selected===i&&i!==q.c?"wrong":""}" data-i="${i}" ${checked?"disabled":""}><span class="num">${i+1}</span><span>${a}</span></button>`).join("")}</div><div class="explain ${checked?"show":""}">${checked?(selected===q.c?'<strong>정답입니다!</strong>':'<strong style="color:var(--red)">오답입니다. 정답: '+q.a[q.c]+'</strong>')+'<br>'+q.e:''}</div><div class="actions">${checked ? (state.tab === "wrong" ? '<button class="secondary" id="again">다시 풀기</button>' : '') + '<button class="primary" id="next">다음 문제</button>' :'<button class="primary" id="submit" '+(selected<0?'disabled':'')+'>정답 확인</button>'}</div>`;
-root.querySelectorAll(".choice").forEach(button => {
-  button.onclick = () => {
-    if (busy || checked) return;
-    state = { ...state, selected: Number(button.dataset.i) };
-    draw();
-  };
-});
-const submit = $("submit"), next = $("next"), again = $("again");
-if (submit) submit.onclick = () => submitAnswer(q);
-if (next) next.onclick = () => changePosition({});
-if (again) again.onclick = () => changePosition({}, true);
+function escapeHtml(text = "") {
+  return String(text).replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]);
 }
 
-document.querySelectorAll(".tab").forEach(button => {
-  button.onclick = () => changePosition({ tab: button.dataset.tab });
-});
+function stripReading(text) {
+  return text.replace(/\{([^{}|]+)\|[^{}]+\}/g, "$1");
+}
+
+function japanese(text, level) {
+  return escapeHtml(text).replace(/\{([^{}|]+)\|([^{}]+)\}/g, (_, word, reading) =>
+    introductory.includes(level) ? "<ruby>" + word + "<rt>" + reading + "</rt></ruby>" : word);
+}
+
+function render() {
+  const profile = onCurrentDay(state);
+  const { view, level, selected, checked, today, solved, correct, accuracyBase } = profile;
+  const question = questionsById.get(profile.questionId);
+  const attempts = solved - accuracyBase[0];
+  const mistakes = reviewPool(profile);
+  const streak = [profile.day, previousDay(profile.day)].includes(profile.lastStudyDay) ? profile.streak : 0;
+
+  for (const button of document.querySelectorAll(".tab")) {
+    button.classList.toggle("active", button.dataset.tab === view);
+    button.setAttribute("aria-pressed", String(button.dataset.tab === view));
+  }
+  for (const button of document.querySelectorAll(".level")) button.classList.toggle("active", button.dataset.l === level);
+  $("todayCount").textContent = today;
+  $("accuracy").textContent = attempts ? Math.round((correct - accuracyBase[1]) / attempts * 100) + "%" : "-";
+  $("wrongCount").textContent = mistakes.length;
+  $("totalSolved").textContent = solved + "문제";
+  $("totalCorrect").textContent = correct + "문제";
+  $("wrongTotal").textContent = mistakes.length + "문제";
+  $("currentLevel").textContent = level;
+  $("goalLabel").textContent = level;
+  $("focusLevel").textContent = level;
+  $("streak").textContent = streak + "일";
+  $("mainTitle").textContent = labels[view];
+  $("mainDesc").textContent = view === "exam" ? "어휘·문법·독해 순서로 푸는 시험 비율 연습" : "4지선다 · 보기 무작위";
+  $("levelLabel").textContent = level + " " + (view === "exam" && question ? labels[question.type] : labels[view]);
+
+  const total = view === "exam" ? profile.exam?.questions.length || 0 :
+    view === "wrong" ? mistakes.length : bank[view][level].length;
+  const bits = readBits(profile.rounds, level + ":" + view);
+  const completed = view === "exam" ? (profile.exam?.position || 0) + Number(checked) :
+    view === "wrong" ? 0 : bank[view][level].filter(item => hasBit(bits, item.index)).length;
+  $("qCount").textContent = view === "wrong" ? "현재 오답 " + total + "개" : completed + " / " + total + "문항";
+  $("bar").style.width = total ? Math.min(100, completed / total * 100) + "%" : "0%";
+
+  const root = $("quiz");
+  if (!question) {
+    root.innerHTML = view === "exam" ?
+      '<div class="empty">시험 비율 연습 완료 · ' + (profile.exam?.correct || 0) + ' / ' + total +
+        ' 정답<br><button type="button" class="secondary" id="restartExam">새 시험 시작</button></div>' :
+      '<div class="empty">이 등급에서 복습할 오답이 없어요.</div>';
+    $("restartExam")?.addEventListener("click", () => changePosition("exam", level, "restart"));
+    return;
+  }
+
+  const vocabulary = question.type === "vocab";
+  const heading = vocabulary ? question.display || question.w : question.s || question.text;
+  const prompt = vocabulary ? question.prompt || "단어의 뜻을 고르세요." :
+    question.q || "빈칸에 들어갈 가장 적절한 표현을 고르세요.";
+  const reading = vocabulary && question.r && introductory.includes(level) && (!question.readingTest || checked)
+    ? '<div class="reading">' + escapeHtml(question.r) + '</div>' : "";
+  const headingClass = vocabulary ? "word" : question.type === "grammar" ? "grammarline" : "readingtext";
+  const choices = profile.order.map((index, position) => {
+    const status = checked && index === question.c ? " correct" :
+      checked && selected === index ? " wrong" : selected === index ? " selected" : "";
+    return '<button class="choice' + status + '" type="button" data-choice="' + index + '"' +
+      ' aria-pressed="' + String(selected === index) + '"' + (checked ? " disabled" : "") +
+      '><span class="num">' + (position + 1) + '</span>' + japanese(question.a[index], level) + '</button>';
+  }).join("");
+  const explanation = checked ? '<div class="explain show" role="status"><strong>' +
+    (selected === question.c ? "정답입니다." : "정답 · " + japanese(question.a[question.c], level)) +
+    '</strong><br>' + japanese(question.e, level) + '</div>' : "";
+  const again = view !== "exam" ? '<button class="secondary" id="again">다시 풀기</button>' : "";
+  const finalInExam = view === "exam" && profile.exam.position === profile.exam.questions.length - 1;
+  const buttons = checked ? again + '<button class="primary" id="next">' +
+    (finalInExam ? "결과 보기" : "다음 문제") + '</button>' :
+    '<button class="primary" id="submit"' + (selected < 0 ? " disabled" : "") + '>정답 확인</button>';
+
+  root.innerHTML = '<div class="' + headingClass + '" lang="ja">' + japanese(heading, level) + '</div>' +
+    reading + '<div class="question">' + japanese(prompt, level) + '</div><div class="choices">' +
+    choices + '</div>' + explanation + '<div class="actions">' + buttons + '</div>';
+  for (const button of root.querySelectorAll(".choice")) {
+    button.onclick = () => {
+      if (busy || checked) return;
+      state = { ...state, selected: Number(button.dataset.choice) };
+      render();
+      $("submit")?.focus();
+    };
+  }
+  $("submit")?.addEventListener("click", () => submitAnswer(question));
+  $("next")?.addEventListener("click", () => changePosition());
+  $("again")?.addEventListener("click", () => changePosition(view, level, "retry"));
+}
+
+for (const button of document.querySelectorAll(".tab")) {
+  button.onclick = () => {
+    if (button.dataset.tab !== state.view) changePosition(button.dataset.tab);
+  };
+}
 $("levels").innerHTML = levels.map(level => '<button class="level" data-l="' + level + '">' + level + '</button>').join("");
-document.querySelectorAll(".level").forEach(button => {
-  button.onclick = () => changePosition({ level: button.dataset.l });
-});
-$("mode").onchange = event => {
-  const mode = event.target.value;
-  event.target.value = state.mode;
-  const tab = mode === "wrong" ? "wrong" : state.tab === "wrong" ? "vocab" : state.tab;
-  changePosition({ tab });
+for (const button of document.querySelectorAll(".level")) {
+  button.onclick = () => {
+    if (button.dataset.l !== state.level) changePosition(state.view, button.dataset.l);
+  };
+}
+$("resetAccuracy").onclick = () => {
+  if (window.confirm("누적 정답률을 초기화할까요? 이전 풀이 수와 오답 노트는 계속 볼 수 있어요.")) {
+    save({ ...onCurrentDay(state), accuracyBase: [state.solved, state.correct] });
+  }
 };
-state = restoreProfile(state);
-render();
+setBusy(false);
+report("유저명을 입력하면 이전에 풀던 문제부터 이어서 공부할 수 있어요.");
+
 </script></body></html>
