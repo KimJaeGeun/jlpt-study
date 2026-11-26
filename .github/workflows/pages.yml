@@ -5,6 +5,11 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: github-pages
   cancel-in-progress: false
@@ -12,37 +17,47 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out production
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main
           path: production
           persist-credentials: false
-      - name: Check out dev
-        uses: actions/checkout@v4
+      - name: Check dev branch
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(gh api --include "repos/$GITHUB_REPOSITORY/branches/dev" 2>/dev/null | head -n1)
+          case "$status" in
+            *" 200 "*) echo "exists=true" >> "$GITHUB_OUTPUT" ;;
+            *" 404 "*) echo "exists=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unable to check the dev branch ($status)" >&2; exit 1 ;;
+          esac
+      - uses: actions/checkout@v6
+        if: steps.preview.outputs.exists == 'true'
         with:
           ref: dev
           path: preview
           persist-credentials: false
       - name: Assemble site
         run: |
-          mkdir -p _site/dev
-          cp production/index.html _site/index.html
-          cp preview/index.html _site/dev/index.html
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
+          mkdir -p _site
+          for asset in index.html bank-data.js question-bank-notice.txt; do
+            if [ -f "production/$asset" ]; then cp "production/$asset" _site/; fi
+          done
+          if [ -d preview ]; then
+            mkdir -p _site/dev
+            for asset in index.html bank-data.js question-bank-notice.txt; do
+              if [ -f "preview/$asset" ]; then cp "preview/$asset" _site/dev/; fi
+            done
+          fi
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
-      - name: Deploy site
+      - uses: actions/deploy-pages@v5
         id: deployment
-        uses: actions/deploy-pages@v4
